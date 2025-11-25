@@ -29,8 +29,11 @@ jobs:
           chmod 600 id_rsa
 
           # Split hosts by comma and loop
-          for host in $(echo "${{ secrets.DEPLOY_HOSTS }}" | tr "," "\n"); do
-            echo "Deploying to $host..."
-            scp -i id_rsa -o StrictHostKeyChecking=no -r ./dist/* \
+          for entry in $(echo "${{ secrets.DEPLOY_TARGETS }}" | tr "," "\n"); do
+            host=$(echo $entry | cut -d: -f1)
+            port=$(echo $entry | cut -d: -f2)
+
+            echo "Deploying to $host on port $port..."
+            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./dist/* \
               ${{ secrets.SERVER_USER }}@$host:/var/www/app
           done
