@@ -32,8 +32,9 @@ jobs:
           for entry in $(echo "${{ secrets.DEPLOY_TARGETS }}" | tr "," "\n"); do
             host=$(echo $entry | cut -d: -f1)
             port=$(echo $entry | cut -d: -f2)
+            echo "$host : $port"
 
             echo "Deploying to $host on port $port..."
             scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./dist/* \
-              ${{ secrets.SERVER_USER }}@$host:/var/www/app
+              ${{ secrets.SERVER_USER }}@$host:/var/
           done
