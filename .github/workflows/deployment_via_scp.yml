@@ -18,6 +18,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: splunk
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -35,6 +36,6 @@ jobs:
             echo "$host : $port"
 
             echo "Deploying to $host on port $port..."
-            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./dist/* \
-              ${{ secrets.SERVER_USER }}@$host:/var/
+            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./* \
+              ${{ secrets.SERVER_USER }}@$host:/home/splunk/
           done
