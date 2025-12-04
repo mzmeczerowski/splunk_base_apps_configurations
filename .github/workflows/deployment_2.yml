@@ -1,27 +1,22 @@
-name: Deployment_2_exp
+name: Deployment
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  # push:
-  #   branches: [ "main", "" ]
-  # pull_request:
-  #   branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
+    # 🌟 Accesses secrets and required variables stored in the 'splunk' environment
+    environment: splunk 
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Deploy to all servers
         run: |
+          # The secrets are now available here!
           # Save SSH key from secret
           echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
           chmod 600 id_rsa
