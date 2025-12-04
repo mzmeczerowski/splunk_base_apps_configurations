@@ -26,19 +26,19 @@ jobs:
 
             echo "🚀 Ensuring target directory (/var/splunk) exists on $host..."
             # Create the directory /var/splunk on the remote server using SSH
-            ssh -i id_rsa -o StrictHostKeyChecking=no -p $port \
-              ${{ secrets.SERVER_USER }}@$host \
-              "mkdir -p /var/splunk"
+            # ssh -i id_rsa -o StrictHostKeyChecking=no -p $port \
+            #   ${{ secrets.SERVER_USER }}@$host \
+            #   "mkdir -p /var/splunk"
             
-            if [ $? -ne 0 ]; then
-              echo "❌ Failed to create target directory on $host. Skipping deployment."
-              continue
-            fi
+            # if [ $? -ne 0 ]; then
+            #   echo "❌ Failed to create target directory on $host. Skipping deployment."
+            #   continue
+            # fi
 
             echo "Deploying files from repository root to $host on port $port..."
             # **CORRECTED:** The './*' transfers all files/folders from the repository root.
             scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./* \
-              ${{ secrets.SERVER_USER }}@$host:/var/splunk/
+              ${{ secrets.SERVER_USER }}@$host:/home/splunk/
             
             # --- Deployment Check ---
             if [ $? -eq 0 ]; then
