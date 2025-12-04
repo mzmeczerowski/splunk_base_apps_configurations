@@ -1,4 +1,4 @@
-name: Deployment
+name: Deployment_2_exp
 
 # Controls when the workflow will run
 on:
@@ -30,18 +30,31 @@ jobs:
           for entry in $(echo "${{ secrets.DEPLOY_TARGETS }}" | tr "," "\n"); do
             host=$(echo $entry | cut -d: -f1)
             port=$(echo $entry | cut -d: -f2)
+            
             echo "$host : $port"
 
-            echo "Deploying to $host on port $port..."
-            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./dist/* \
-              ${{ secrets.SERVER_USER }}@$host:/var/
+            echo "🚀 Ensuring target directory (/var/splunk) exists on $host..."
+            # Create the directory /var/splunk on the remote server using SSH
+            ssh -i id_rsa -o StrictHostKeyChecking=no -p $port \
+              ${{ secrets.SERVER_USER }}@$host \
+              "mkdir -p /var/splunk"
             
-            # --- Deployment Check Added Here ---
-            if [ $? -eq 0 ]; then
-              echo "✅ Deployment to $host on port $port was **SUCCESSFUL**."
-            else
-              echo "❌ Deployment to $host on port $port **FAILED**. Stopping deployment."
-              exit 1 # Exit the script and fail the job if deployment fails
+            if [ $? -ne 0 ]; then
+              echo "❌ Failed to create target directory on $host. Skipping deployment."
+              continue
             fi
-            # ----------------------------------
+
+            echo "Deploying to $host on port $port..."
+            # SCP files to the /var/splunk directory
+            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./dist/* \
+              ${{ secrets.SERVER_USER }}@$host:/var/splunk/
+            
+            # --- Deployment Check ---
+            if [ $? -eq 0 ]; then
+              echo "✅ Deployment to $host was **SUCCESSFUL**."
+            else
+              echo "❌ Deployment to $host **FAILED**."
+              exit 1 
+            fi
+            # ------------------------
           done
