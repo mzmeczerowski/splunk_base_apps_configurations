@@ -1,0 +1,47 @@
+name: Deployment
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  # push:
+  #   branches: [ "main", "" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to all servers
+        run: |
+          # Save SSH key from secret
+          echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
+          chmod 600 id_rsa
+
+          # Split hosts by comma and loop
+          for entry in $(echo "${{ secrets.DEPLOY_TARGETS }}" | tr "," "\n"); do
+            host=$(echo $entry | cut -d: -f1)
+            port=$(echo $entry | cut -d: -f2)
+            echo "$host : $port"
+
+            echo "Deploying to $host on port $port..."
+            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./dist/* \
+              ${{ secrets.SERVER_USER }}@$host:/var/
+            
+            # --- Deployment Check Added Here ---
+            if [ $? -eq 0 ]; then
+              echo "✅ Deployment to $host on port $port was **SUCCESSFUL**."
+            else
+              echo "❌ Deployment to $host on port $port **FAILED**. Stopping deployment."
+              exit 1 # Exit the script and fail the job if deployment fails
+            fi
+            # ----------------------------------
+          done
