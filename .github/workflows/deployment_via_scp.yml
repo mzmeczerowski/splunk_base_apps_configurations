@@ -39,7 +39,7 @@ jobs:
             
             sshpass -p "$SERVER_PASSWORD" scp \
               -o StrictHostKeyChecking=no \
-              -P "${port:-22}" \
+              -P "$port" \
               -r ./* \
               "$SERVER_USER@$host:/tmp/"
 
