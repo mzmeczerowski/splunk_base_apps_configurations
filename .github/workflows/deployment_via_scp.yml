@@ -26,8 +26,8 @@ jobs:
       - name: Deploy to all servers
         run: |
           # Save SSH key from secret
-          echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
-          chmod 600 id_rsa
+          # echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
+          # chmod 600 id_rsa
 
           # Split hosts by comma and loop
           for entry in $(echo "${{ secrets.DEPLOY_TARGETS }}" | tr "," "\n"); do
@@ -36,6 +36,11 @@ jobs:
             echo "$host : $port"
 
             echo "Deploying to $host on port $port..."
-            scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./* \
-              ${{ secrets.SERVER_USER }}@$host:/tmp/
+            
+            sshpass -p "$SERVER_PASSWORD" scp \
+              -o StrictHostKeyChecking=no \
+              -P "${port:-22}" \
+              -r ./* \
+              "$SERVER_USER@$host:/tmp/"
+
           done
