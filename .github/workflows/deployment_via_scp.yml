@@ -37,5 +37,5 @@ jobs:
 
             echo "Deploying to $host on port $port..."
             scp -i id_rsa -o StrictHostKeyChecking=no -P $port -r ./* \
-              ${{ secrets.SERVER_USER }}@$host:/home/splunk/
+              ${{ secrets.SERVER_USER }}@$host:/tmp/
           done
